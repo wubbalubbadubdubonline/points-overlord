@@ -1,11 +1,11 @@
 import discord
 import os
+import json
 from discord.ext import commands
 from Overlord.cogs.utils import permissions
-import json
 
 ''' proof of concept system, the reputation name is temporary '''
-class Coins:
+class Reputation:
     def __init__(self, bot):
         self.bot = bot
         if os.path.isfile('data.json'):
@@ -28,6 +28,12 @@ class Coins:
             await self.bot.say("{}. {}: {}".format(i, ctx.message.server.get_member(userid).name, amount))
             i += 1
 
+    async def on_message(self, message: discord.Message):
+        if "thanks" in message.content and len(message.mentions) > 0:
+            for member in message.mentions:
+                if member != message.author and member != self.bot.user:
+                    self.addrep(10, message.author, member)
+
     def addrep(self, amount : int, srcMemeber : discord.Member, targetMember : discord.Member):
         self.bot.logger.info("Memeber {} is giving {} reputation to {}".format(srcMemeber.name, amount, targetMember.name))
         if targetMember.id not in self.userlist:
@@ -47,4 +53,4 @@ class Coins:
     userlist = {}
 
 def setup(bot):
-    bot.add_cog(Coins(bot))
+    bot.add_cog(Reputation(bot))
